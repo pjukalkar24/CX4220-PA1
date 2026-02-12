@@ -28,12 +28,15 @@ double pi_calc(long int n, int rank, int size) {
     // coordinate send/recv
     for (int j = 0; j < d; ++j) {
         int permutation = (1 << j);
+	int partner = rank ^ permutation;
+	if (partner >= size) continue;
+
         if ((rank & permutation) != 0) {
-            MPI_Send(&local_sum, 1, MPI_LONG, rank ^ permutation, 0, MPI_COMM_WORLD);
+            MPI_Send(&local_sum, 1, MPI_LONG, partner, 0, MPI_COMM_WORLD);
             break;
         } else {
             long int recv_sum;
-            MPI_Recv(&recv_sum, 1, MPI_LONG, rank ^ permutation, 0, MPI_COMM_WORLD, NULL);
+            MPI_Recv(&recv_sum, 1, MPI_LONG, partner, 0, MPI_COMM_WORLD, NULL);
             local_sum += recv_sum;
         }
     }
